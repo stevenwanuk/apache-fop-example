@@ -15,124 +15,157 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopConfParser;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.xml.sax.SAXException;
 
-public class FOPPdfDemo {
-	
-	public static final String RESOURCES_DIR;
-	public static final String OUTPUT_DIR;
-	
-	static {
-		RESOURCES_DIR = "src//main//resources//";
-		OUTPUT_DIR = "src//main//resources//output//";
-	}
-	
-	public static void main(String[] args) {
-		FOPPdfDemo fOPPdfDemo = new FOPPdfDemo();
-		try {
-			fOPPdfDemo.convertToFO();
-		} catch (FOPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+public class FOPPdfDemo
+{
 
-	/**
-	 * Method that will convert the given XML to PDF
-	 * 
-	 * @throws IOException
-	 * @throws FOPException
-	 * @throws TransformerException
-	 */
-	public void convertToPDF() throws IOException, FOPException, TransformerException {
-		// the XSL FO file
-		File xsltFile = new File(RESOURCES_DIR + "//template.xsl");
-		// the XML file which provides the input
-		StreamSource xmlSource = new StreamSource(new File(RESOURCES_DIR + "//Employees.xml"));
-		// create an instance of fop factory
-		FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
-		// a user agent is needed for transformation
-		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
-		// Setup output
-		OutputStream out;
-		out = new java.io.FileOutputStream(OUTPUT_DIR + "//employee.pdf");
+    public static final String RESOURCES_DIR;
+    public static final String OUTPUT_DIR;
 
-		try {
-			// Construct fop with desired output format
-			Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
+    static
+    {
+        RESOURCES_DIR = "C:\\workspace\\apache-fop-example\\src\\main\\resources";
+        OUTPUT_DIR = "C:\\workspace\\apache-fop-example\\src\\main\\resources\\output\\";
+    }
 
-			// Setup XSLT
-			TransformerFactory factory = TransformerFactory.newInstance();
-			Transformer transformer = factory.newTransformer(new StreamSource(xsltFile));
+    public static void main(final String[] args)
+    {
+        FOPPdfDemo fOPPdfDemo = new FOPPdfDemo();
+        try
+        {
+            fOPPdfDemo.convertToFO();
+            fOPPdfDemo.convertToPDF();
+        }
+        catch (FOPException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TransformerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (SAXException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-			// Resulting SAX events (the generated FO) must be piped through to
-			// FOP
-			Result res = new SAXResult(fop.getDefaultHandler());
+    /**
+     * Method that will convert the given XML to PDF
+     * 
+     * @throws IOException
+     * @throws TransformerException
+     * @throws SAXException 
+     */
+    public void convertToPDF() throws IOException, TransformerException, SAXException
+    {
+        // the XSL FO file
+        File xsltFile = new File(RESOURCES_DIR + "//template.xsl");
+        // the XML file which provides the input
+        StreamSource xmlSource =
+                new StreamSource(new File(RESOURCES_DIR + "//Employees.xml"));
+        // create an instance of fop factory
 
-			// Start XSLT transformation and FOP processing
-			// That's where the XML is first transformed to XSL-FO and then
-			// PDF is created
-			transformer.transform(xmlSource, res);
-		} finally {
-			out.close();
-		}
-	}
+        FopFactory fopFactory = new FopConfParser(
+                new File(
+                        "C:\\workspace\\content-transformer-service\\src\\main\\resources\\fop_conf\\fop.conf")).getFopFactoryBuilder().build();
 
-	/**
-	 * This method will convert the given XML to XSL-FO
-	 * 
-	 * @throws IOException
-	 * @throws FOPException
-	 * @throws TransformerException
-	 */
-	public void convertToFO() throws IOException, FOPException, TransformerException {
-		// the XSL FO file
-		File xsltFile = new File(RESOURCES_DIR + "//template.xsl");
+        //FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+        // a user agent is needed for transformation
+        FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+        // Setup output
+        OutputStream out;
+        out = new java.io.FileOutputStream(OUTPUT_DIR + "//employee.pdf");
 
-		/*
-		 * TransformerFactory factory = TransformerFactory.newInstance();
-		 * Transformer transformer = factory.newTransformer(new
-		 * StreamSource("F:\\Temp\\template.xsl"));
-		 */
+        try
+        {
+            // Construct fop with desired output format
+            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
 
-		// the XML file which provides the input
-		StreamSource xmlSource = new StreamSource(new File(RESOURCES_DIR + "//Employees.xml"));
+            // Setup XSLT
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer(new StreamSource(xsltFile));
 
-		// a user agent is needed for transformation
-		/* FOUserAgent foUserAgent = fopFactory.newFOUserAgent(); */
-		// Setup output
-		OutputStream out;
+            // Resulting SAX events (the generated FO) must be piped through to
+            // FOP
+            Result res = new SAXResult(fop.getDefaultHandler());
 
-		out = new java.io.FileOutputStream(OUTPUT_DIR + "temp.fo");
+            // Start XSLT transformation and FOP processing
+            // That's where the XML is first transformed to XSL-FO and then
+            // PDF is created
+            transformer.transform(xmlSource, res);
+        }
+        finally
+        {
+            out.close();
+        }
+    }
 
-		try {
-			// Setup XSLT
-			TransformerFactory factory = TransformerFactory.newInstance();
-			Transformer transformer = factory.newTransformer(new StreamSource(xsltFile));
+    /**
+     * This method will convert the given XML to XSL-FO
+     * 
+     * @throws IOException
+     * @throws FOPException
+     * @throws TransformerException
+     */
+    public void convertToFO() throws IOException, FOPException, TransformerException
+    {
+        // the XSL FO file
+        File xsltFile = new File(RESOURCES_DIR + "//template.xsl");
 
-			// Resulting SAX events (the generated FO) must be piped through to
-			// FOP
-			// Result res = new SAXResult(fop.getDefaultHandler());
+        /*
+         * TransformerFactory factory = TransformerFactory.newInstance(); Transformer
+         * transformer = factory.newTransformer(new
+         * StreamSource("F:\\Temp\\template.xsl"));
+         */
 
-			Result res = new StreamResult(out);
+        // the XML file which provides the input
+        StreamSource xmlSource =
+                new StreamSource(new File(RESOURCES_DIR + "//Employees.xml"));
 
-			// Start XSLT transformation and FOP processing
-			transformer.transform(xmlSource, res);
+        // a user agent is needed for transformation
+        /* FOUserAgent foUserAgent = fopFactory.newFOUserAgent(); */
+        // Setup output
+        OutputStream out;
 
-			// Start XSLT transformation and FOP processing
-			// That's where the XML is first transformed to XSL-FO and then
-			// PDF is created
-			transformer.transform(xmlSource, res);
-		} finally {
-			out.close();
-		}
-	}
+        out = new java.io.FileOutputStream(OUTPUT_DIR + "temp.fo");
+
+        try
+        {
+            // Setup XSLT
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer(new StreamSource(xsltFile));
+
+            // Resulting SAX events (the generated FO) must be piped through to
+            // FOP
+            // Result res = new SAXResult(fop.getDefaultHandler());
+
+            Result res = new StreamResult(out);
+
+            // Start XSLT transformation and FOP processing
+            transformer.transform(xmlSource, res);
+
+            // Start XSLT transformation and FOP processing
+            // That's where the XML is first transformed to XSL-FO and then
+            // PDF is created
+            transformer.transform(xmlSource, res);
+        }
+        finally
+        {
+            out.close();
+        }
+    }
 
 }
